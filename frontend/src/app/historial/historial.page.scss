@@ -1,0 +1,154 @@
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  padding: 14px 14px 4px;
+
+  .stat-card {
+    background: rgba(var(--ion-color-primary-rgb), 0.07);
+    border-radius: 12px;
+    padding: 12px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+
+    ion-icon { font-size: 20px; }
+
+    .stat-value {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--ion-color-dark);
+      text-align: center;
+    }
+
+    .stat-label {
+      font-size: 10px;
+      color: var(--ion-color-medium);
+      text-align: center;
+    }
+  }
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 16px 6px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ion-color-dark);
+
+  ion-icon { font-size: 16px; }
+}
+
+.frecuentes-list {
+  margin: 0 12px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(0,0,0,0.07);
+
+  ion-item {
+    --padding-start: 12px;
+    --inner-padding-end: 12px;
+  }
+}
+
+.rank-badge {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--ion-color-primary);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 4px;
+}
+
+.freq-bar {
+  width: 60px;
+  height: 5px;
+  background: #e8e8e8;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-left: 8px;
+
+  .freq-fill {
+    height: 100%;
+    background: var(--ion-color-warning);
+    border-radius: 3px;
+  }
+}
+
+.compra-card {
+  margin: 6px 12px;
+  background: var(--ion-color-light);
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,0.07);
+  padding: 14px;
+  margin-bottom: 10px;
+}
+
+.compra-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+
+  h3 { font-size: 14px; font-weight: 700; }
+
+  .compra-fecha {
+    font-size: 11px;
+    color: var(--ion-color-medium);
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    margin-top: 2px;
+
+    ion-icon { font-size: 12px; }
+  }
+
+  .compra-total {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--ion-color-primary);
+    flex-shrink: 0;
+  }
+}
+
+.barra-gasto {
+  height: 4px;
+  background: #e0e0e0;
+  border-radius: 2px;
+  margin-bottom: 10px;
+  overflow: hidden;
+
+  .barra-gasto-fill {
+    height: 100%;
+    background: var(--ion-color-primary);
+    border-radius: 2px;
+    transition: width 0.4s;
+  }
+}
+
+.productos-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.chip-mini {
+  height: 24px;
+  font-size: 10px;
+  --padding-start: 8px;
+  --padding-end: 8px;
+}
+
+.btn-repetir {
+  --border-radius: 10px;
+}

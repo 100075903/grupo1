@@ -1,0 +1,150 @@
+.scanner-content {
+  --background: #111827;
+}
+
+.camera-view {
+  position: relative;
+  height: 280px;
+  background: #1f2937;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+
+  &.scanning { background: #0f172a; }
+}
+
+.overlay-top, .overlay-bottom {
+  position: absolute;
+  left: 0; right: 0;
+  height: 60px;
+  background: rgba(0,0,0,0.55);
+  z-index: 2;
+}
+.overlay-top  { top: 0; }
+.overlay-bottom { bottom: 0; }
+
+.scan-frame {
+  width: 180px;
+  height: 120px;
+  position: relative;
+  z-index: 3;
+
+  .corner {
+    position: absolute;
+    width: 24px; height: 24px;
+    border-color: #60a5fa;
+    border-style: solid;
+  }
+  .tl { top: 0; left: 0;     border-width: 3px 0 0 3px;  border-radius: 6px 0 0 0; }
+  .tr { top: 0; right: 0;    border-width: 3px 3px 0 0;  border-radius: 0 6px 0 0; }
+  .bl { bottom: 0; left: 0;  border-width: 0 0 3px 3px;  border-radius: 0 0 0 6px; }
+  .br { bottom: 0; right: 0; border-width: 0 3px 3px 0;  border-radius: 0 0 6px 0; }
+
+  .scan-line {
+    position: absolute;
+    left: 8px; right: 8px;
+    height: 2px;
+    background: #3b82f6;
+    box-shadow: 0 0 8px #3b82f6;
+    animation: scanMove 1.4s ease-in-out infinite alternate;
+  }
+
+  &.active .corner { border-color: #3b82f6; }
+}
+
+@keyframes scanMove {
+  from { top: 10%; }
+  to   { top: 85%; }
+}
+
+.scan-instruction {
+  position: absolute;
+  bottom: 8px;
+  text-align: center;
+  color: rgba(255,255,255,0.75);
+  font-size: 13px;
+  z-index: 4;
+  line-height: 1.6;
+
+  ion-icon { font-size: 24px; display: block; margin: 0 auto 4px; }
+}
+
+.pulse {
+  animation: pulseAnim 0.8s ease-in-out infinite alternate;
+  color: #3b82f6;
+}
+@keyframes pulseAnim {
+  from { opacity: 0.5; }
+  to   { opacity: 1; }
+}
+
+.resultado-panel {
+  background: white;
+  border-radius: 20px 20px 0 0;
+  padding: 20px 20px 8px;
+  margin-top: -1px;
+
+  .resultado-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--ion-color-success);
+    margin-bottom: 12px;
+    font-weight: 600;
+
+    ion-icon { font-size: 18px; }
+  }
+
+  h2 { font-size: 18px; font-weight: 700; color: #111; margin-bottom: 4px; }
+  .marca  { font-size: 13px; color: #666; margin-bottom: 4px; }
+  .codigo { font-size: 11px; color: #999; ion-icon { vertical-align: middle; } }
+}
+
+.precio-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 12px 0;
+
+  .precio { font-size: 26px; font-weight: 700; color: var(--ion-color-primary); }
+}
+
+.cantidad-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0;
+  border-top: 1px solid #f0f0f0;
+  margin-bottom: 8px;
+
+  ion-label { font-size: 14px; flex: 1; color: #555; }
+  strong { font-size: 18px; font-weight: 700; min-width: 28px; text-align: center; }
+}
+
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 8px;
+}
+
+.exito-panel {
+  background: white;
+  border-radius: 20px 20px 0 0;
+  padding: 40px 20px;
+  text-align: center;
+
+  ion-icon { font-size: 64px; }
+  h3 { font-size: 20px; font-weight: 700; color: var(--ion-color-success); margin-top: 12px; }
+}
+
+.scan-btn-wrap {
+  background: #1f2937;
+  padding: 20px 20px 32px;
+}
+
+.scan-main-btn {
+  --border-radius: 12px;
+}

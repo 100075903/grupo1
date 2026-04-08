@@ -1,0 +1,102 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Historial de Compras</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+
+  <!-- Tarjetas de resumen -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <ion-icon name="cash-outline" color="primary"></ion-icon>
+      <span class="stat-value">RD${{ totalGastado | number }}</span>
+      <span class="stat-label">Total gastado</span>
+    </div>
+    <div class="stat-card">
+      <ion-icon name="receipt-outline" color="primary"></ion-icon>
+      <span class="stat-value">{{ historial.length }}</span>
+      <span class="stat-label">Compras</span>
+    </div>
+    <div class="stat-card">
+      <ion-icon name="trending-up-outline" color="primary"></ion-icon>
+      <span class="stat-value">RD${{ promedioCompra | number }}</span>
+      <span class="stat-label">Promedio</span>
+    </div>
+  </div>
+
+  <!-- Más comprados -->
+  <div class="section-header">
+    <ion-icon name="star-outline" color="warning"></ion-icon>
+    Productos más frecuentes
+  </div>
+
+  <ion-list class="frecuentes-list">
+    <ion-item *ngFor="let f of frecuentes; let i = index">
+      <div class="rank-badge" slot="start">{{ i + 1 }}</div>
+      <ion-icon [name]="f.icono" slot="start" color="primary"></ion-icon>
+      <ion-label>
+        <h3>{{ f.nombre }}</h3>
+        <p>Comprado {{ f.veces }} veces</p>
+      </ion-label>
+      <div class="freq-bar" slot="end">
+        <div class="freq-fill" [style.width.%]="(f.veces / 8) * 100"></div>
+      </div>
+    </ion-item>
+  </ion-list>
+
+  <!-- Compras pasadas -->
+  <div class="section-header">
+    <ion-icon name="time-outline" color="primary"></ion-icon>
+    Compras recientes
+  </div>
+
+  <div class="compra-card" *ngFor="let c of historial">
+    <div class="compra-top">
+      <div>
+        <h3>{{ c.tienda }}</h3>
+        <p class="compra-fecha">
+          <ion-icon name="calendar-outline"></ion-icon>
+          {{ c.fecha }} · {{ c.items }} productos
+        </p>
+      </div>
+      <div class="compra-total">RD${{ c.total | number }}</div>
+    </div>
+
+    <div class="barra-gasto">
+      <div class="barra-gasto-fill" [style.width.%]="barWidth(c.total)"></div>
+    </div>
+
+    <div class="productos-preview">
+      <ion-chip
+        *ngFor="let p of c.productos.slice(0, 4)"
+        outline
+        color="medium"
+        class="chip-mini"
+      >
+        <ion-label>{{ p }}</ion-label>
+      </ion-chip>
+      <ion-chip
+        *ngIf="c.productos.length > 4"
+        outline
+        color="medium"
+        class="chip-mini"
+      >
+        <ion-label>+{{ c.productos.length - 4 }} más</ion-label>
+      </ion-chip>
+    </div>
+
+    <ion-button
+      expand="block"
+      fill="outline"
+      color="primary"
+      size="small"
+      (click)="repetirCompra(c)"
+      class="btn-repetir"
+    >
+      <ion-icon slot="start" name="refresh-outline"></ion-icon>
+      Repetir esta compra
+    </ion-button>
+  </div>
+
+</ion-content>

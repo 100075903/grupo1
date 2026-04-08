@@ -1,0 +1,52 @@
+/** Compras RD - Ionic Theme **/
+
+:root {
+  --ion-color-primary:         #1B6CA8;
+  --ion-color-primary-rgb:     27, 108, 168;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-shade:   #175e93;
+  --ion-color-primary-tint:    #e8f2fa;
+
+  --ion-color-secondary:       #0ea5e9;
+  --ion-color-secondary-rgb:   14, 165, 233;
+  --ion-color-secondary-contrast: #ffffff;
+  --ion-color-secondary-shade: #0c91cf;
+  --ion-color-secondary-tint:  #26aefb;
+
+  --ion-color-success:         #16a34a;
+  --ion-color-success-rgb:     22, 163, 74;
+  --ion-color-success-contrast: #ffffff;
+  --ion-color-success-shade:   #15803d;
+  --ion-color-success-tint:    #d1fae5;
+
+  --ion-color-warning:         #f59e0b;
+  --ion-color-warning-rgb:     245, 158, 11;
+  --ion-color-warning-contrast: #ffffff;
+  --ion-color-warning-shade:   #d97706;
+  --ion-color-warning-tint:    #fef3c7;
+
+  --ion-color-danger:          #dc2626;
+  --ion-color-danger-rgb:      220, 38, 38;
+  --ion-color-danger-contrast: #ffffff;
+  --ion-color-danger-shade:    #b91c1c;
+  --ion-color-danger-tint:     #fee2e2;
+
+  --ion-color-light:           #f9fafb;
+  --ion-color-medium:          #6b7280;
+  --ion-color-dark:            #111827;
+
+  --ion-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+
+  --ion-background-color:      #f4f5f8;
+  --ion-text-color:            #111827;
+}
+
+* { box-sizing: border-box; }
+
+ion-content {
+  --background: #f4f5f8;
+}
+
+ion-toolbar[color="primary"] {
+  --background: #1B6CA8;
+}

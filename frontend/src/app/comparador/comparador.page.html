@@ -1,0 +1,100 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Comparador de Precios</ion-title>
+  </ion-toolbar>
+  <ion-toolbar color="primary">
+    <ion-searchbar
+      [(ngModel)]="busqueda"
+      placeholder="Ej: arroz, leche, aceite..."
+      animated
+      (keyup.enter)="buscar()"
+      (ionClear)="resultado = null"
+      debounce="0"
+    ></ion-searchbar>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+
+  <!-- Sugerencias rápidas -->
+  <div class="sugerencias" *ngIf="!resultado && !buscando">
+    <p class="sugerencias-label">Búsquedas frecuentes</p>
+    <div class="chips-row">
+      <ion-chip (click)="buscarSugerida('arroz')" outline color="primary">
+        <ion-label>Arroz</ion-label>
+      </ion-chip>
+      <ion-chip (click)="buscarSugerida('leche')" outline color="primary">
+        <ion-label>Leche</ion-label>
+      </ion-chip>
+      <ion-chip (click)="buscarSugerida('aceite')" outline color="primary">
+        <ion-label>Aceite</ion-label>
+      </ion-chip>
+      <ion-chip (click)="buscarSugerida('pollo')" outline color="primary">
+        <ion-label>Pollo</ion-label>
+      </ion-chip>
+    </div>
+
+    <div class="empty-hint">
+      <ion-icon name="pricetag-outline"></ion-icon>
+      <p>Busca un producto para comparar precios en tiendas cercanas</p>
+    </div>
+  </div>
+
+  <!-- Cargando -->
+  <div class="loading-state" *ngIf="buscando">
+    <ion-spinner name="crescent" color="primary"></ion-spinner>
+    <p>Consultando precios...</p>
+  </div>
+
+  <!-- Resultados -->
+  <div *ngIf="resultado && !buscando">
+
+    <div class="resultado-titulo">
+      <ion-icon name="search-outline" color="primary"></ion-icon>
+      <span>{{ resultado.nombre }}</span>
+    </div>
+
+    <ion-list>
+      <ion-item
+        *ngFor="let r of resultado.precios; let i = index"
+        [class.mejor-precio]="r.mejor"
+      >
+        <div class="precio-item" slot="start">
+          <ion-icon
+            [name]="r.mejor ? 'ribbon' : 'storefront-outline'"
+            [color]="r.mejor ? 'success' : 'medium'"
+          ></ion-icon>
+        </div>
+
+        <ion-label>
+          <div class="tienda-header">
+            <h2>{{ r.tienda }}</h2>
+            <ion-badge *ngIf="r.mejor" color="success">Mejor precio</ion-badge>
+          </div>
+          <p class="tienda-info">
+            <ion-icon name="navigate-outline"></ion-icon> {{ r.distancia }} ·
+            <ion-icon name="time-outline"></ion-icon> {{ r.horario }}
+          </p>
+          <div class="barra-container">
+            <div class="barra-fill" [style.width.%]="getPorcentaje(r.precio, resultado!.precios)"></div>
+          </div>
+          <p class="actualizado">Actualizado {{ r.actualizado }}</p>
+        </ion-label>
+
+        <div slot="end" class="precio-badge" [class.mejor]="r.mejor">
+          RD${{ r.precio }}
+        </div>
+
+      </ion-item>
+    </ion-list>
+
+    <div class="nueva-busqueda">
+      <ion-button expand="block" fill="outline" color="primary" (click)="resultado = null; busqueda = ''">
+        <ion-icon slot="start" name="search-outline"></ion-icon>
+        Nueva búsqueda
+      </ion-button>
+    </div>
+
+  </div>
+
+</ion-content>

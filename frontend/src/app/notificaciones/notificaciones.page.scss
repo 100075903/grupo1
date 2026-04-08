@@ -1,0 +1,90 @@
+.segmento {
+  margin: 8px 16px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.notif-list {
+  padding: 8px 12px;
+}
+
+.notif-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 12px;
+  border-radius: 12px;
+  margin-bottom: 8px;
+  background: var(--ion-color-light);
+  border: 1px solid rgba(0,0,0,0.06);
+  position: relative;
+  transition: background 0.2s;
+
+  &.no-leida {
+    background: rgba(var(--ion-color-primary-rgb), 0.04);
+    border-color: rgba(var(--ion-color-primary-rgb), 0.15);
+  }
+}
+
+.avatar {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700;
+  flex-shrink: 0;
+}
+
+.notif-body {
+  flex: 1;
+
+  .notif-text {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--ion-color-dark);
+    margin-bottom: 4px;
+
+    strong { font-weight: 700; }
+
+    [data-accion="eliminó"] { color: var(--ion-color-danger); }
+    [data-accion="compró"]  { color: var(--ion-color-success-shade); }
+    [data-accion="agregó"]  { color: var(--ion-color-primary); }
+    [data-accion="creó"]    { color: var(--ion-color-primary); }
+    [data-accion="agregaste"] { color: var(--ion-color-primary); }
+  }
+
+  .producto-ref {
+    font-weight: 600;
+    color: var(--ion-color-dark);
+  }
+
+  .notif-meta {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    .accion-icon { font-size: 14px; }
+    .tiempo { font-size: 11px; color: var(--ion-color-medium); }
+  }
+}
+
+.unread-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--ion-color-primary);
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  text-align: center;
+  color: var(--ion-color-medium);
+
+  ion-icon { font-size: 56px; margin-bottom: 12px; }
+  h3 { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+  p  { font-size: 14px; }
+}

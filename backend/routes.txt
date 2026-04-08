@@ -1,0 +1,35 @@
+**Auth**
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+
+**Familia**
+- `POST /api/familias`
+- `POST /api/familias/unirse`
+- `GET /api/familias/:familia_id/miembros`
+
+**Lista de compras**
+- `GET /api/listas/:familia_id`
+- `POST /api/listas/:lista_id/productos`
+- `PATCH /api/listas/:lista_id/productos/:id`
+- `DELETE /api/listas/:lista_id/productos/:id`
+
+**Escáner / Productos**
+- `GET /api/productos/barcode/:codigo`
+- `GET /api/productos/buscar?q=&limit=`
+
+**Comparador de precios**
+- `GET /api/precios?q=&lat=&lng=&radio_km=`
+- `POST /api/precios/reportar`
+
+**Tiendas**
+- `GET /api/tiendas?lat=&lng=&radio_km=&tipo=&solo_abiertos=`
+- `POST /api/tiendas/:tienda_id/reseñas`
+
+**Historial**
+- `GET /api/historial/:familia_id?limit=&offset=`
+- `GET /api/historial/:familia_id/frecuentes`
+- `POST /api/historial/:familia_id/guardar`
+
+**Notificaciones**
+- `GET /api/notificaciones/:usuario_id`
+- `PATCH /api/notificaciones/:usuario_id/leer`
