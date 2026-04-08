@@ -1,0 +1,139 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Compras RD</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="agregarProducto()">
+        <ion-icon slot="icon-only" name="add-outline"></ion-icon>
+      </ion-button>
+      <ion-button routerLink="/tabs/notificaciones">
+        <ion-icon slot="icon-only" name="notifications-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+
+  <ion-toolbar color="primary">
+    <ion-searchbar
+      [(ngModel)]="busqueda"
+      placeholder="Buscar producto..."
+      animated
+      color="light"
+    ></ion-searchbar>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+
+  <!-- Resumen superior -->
+  <div class="resumen-bar">
+    <div class="resumen-item">
+      <ion-icon name="people-outline" color="primary"></ion-icon>
+      <span>{{ integrantes.length }} activos</span>
+    </div>
+    <div class="resumen-item">
+      <ion-icon name="cube-outline" color="primary"></ion-icon>
+      <span>{{ pendientes.length }} pendientes</span>
+    </div>
+    <div class="resumen-item">
+      <ion-icon name="cash-outline" color="primary"></ion-icon>
+      <span>RD${{ totalEstimado | number }}</span>
+    </div>
+  </div>
+
+  <!-- Hint de gestos -->
+  <div class="swipe-hint">
+    <span><ion-icon name="arrow-back-outline"></ion-icon> Eliminar</span>
+    <span>Marcar comprado <ion-icon name="arrow-forward-outline"></ion-icon></span>
+  </div>
+
+  <!-- Pendientes -->
+  <ion-list *ngIf="pendientes.length > 0">
+    <ion-list-header>
+      <ion-label>Pendientes ({{ pendientes.length }})</ion-label>
+    </ion-list-header>
+
+    <ion-item-sliding *ngFor="let p of pendientes">
+
+      <!-- Swipe izquierdo → Eliminar -->
+      <ion-item-options side="start" (ionSwipe)="eliminar(p.id)">
+        <ion-item-option color="danger" expandable (click)="eliminar(p.id)">
+          <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+        </ion-item-option>
+      </ion-item-options>
+
+      <ion-item>
+        <ion-checkbox
+          slot="start"
+          [(ngModel)]="p.comprado"
+          (ngModelChange)="toggleComprado(p.id)"
+          color="primary"
+        ></ion-checkbox>
+        <ion-label>
+          <h3>{{ p.nombre }}</h3>
+          <p>×{{ p.cantidad }} · agregado por {{ p.agregadoPor }}</p>
+        </ion-label>
+        <ion-note slot="end" color="medium">RD${{ p.precio | number }}</ion-note>
+      </ion-item>
+
+      <!-- Swipe derecho → Marcar comprado -->
+      <ion-item-options side="end" (ionSwipe)="toggleComprado(p.id)">
+        <ion-item-option color="success" expandable (click)="toggleComprado(p.id)">
+          <ion-icon slot="icon-only" name="checkmark-outline"></ion-icon>
+        </ion-item-option>
+      </ion-item-options>
+
+    </ion-item-sliding>
+  </ion-list>
+
+  <!-- Comprados -->
+  <ion-list *ngIf="comprados.length > 0">
+    <ion-list-header>
+      <ion-label color="medium">Comprados ({{ comprados.length }})</ion-label>
+    </ion-list-header>
+
+    <ion-item-sliding *ngFor="let p of comprados">
+      <ion-item-options side="start" (ionSwipe)="eliminar(p.id)">
+        <ion-item-option color="danger" expandable (click)="eliminar(p.id)">
+          <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+        </ion-item-option>
+      </ion-item-options>
+
+      <ion-item class="comprado">
+        <ion-checkbox
+          slot="start"
+          [(ngModel)]="p.comprado"
+          (ngModelChange)="toggleComprado(p.id)"
+          color="primary"
+        ></ion-checkbox>
+        <ion-label>
+          <h3 class="tachado">{{ p.nombre }}</h3>
+          <p>×{{ p.cantidad }}</p>
+        </ion-label>
+        <ion-note slot="end" color="medium">RD${{ p.precio | number }}</ion-note>
+      </ion-item>
+
+      <ion-item-options side="end">
+        <ion-item-option color="medium" (click)="toggleComprado(p.id)">
+          <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+        </ion-item-option>
+      </ion-item-options>
+    </ion-item-sliding>
+  </ion-list>
+
+  <!-- Estado vacío -->
+  <div class="empty-state" *ngIf="pendientes.length === 0 && comprados.length === 0">
+    <ion-icon name="basket-outline"></ion-icon>
+    <h3>Lista vacía</h3>
+    <p>Toca + para agregar productos</p>
+  </div>
+
+  <!-- FAB para agregar -->
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button (click)="agregarProducto()" color="primary">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
+</ion-content>

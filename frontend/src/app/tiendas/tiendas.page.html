@@ -1,0 +1,121 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Tiendas Cercanas</ion-title>
+    <ion-buttons slot="end">
+      <ion-button>
+        <ion-icon slot="icon-only" name="options-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar color="primary">
+    <ion-searchbar
+      [(ngModel)]="busqueda"
+      placeholder="Buscar tienda o producto..."
+      animated
+    ></ion-searchbar>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+
+  <!-- Mapa placeholder -->
+  <div class="mapa-placeholder">
+    <ion-icon name="map-outline"></ion-icon>
+    <span>Vista de mapa · Santo Domingo Este</span>
+    <div class="mapa-pins">
+      <div class="pin pin-1"><ion-icon name="location" color="danger"></ion-icon></div>
+      <div class="pin pin-2"><ion-icon name="location" color="primary"></ion-icon></div>
+      <div class="pin pin-3"><ion-icon name="location" color="primary"></ion-icon></div>
+    </div>
+  </div>
+
+  <!-- Filtros por categoría -->
+  <div class="filtros-scroll">
+    <ion-chip
+      *ngFor="let f of filtros"
+      [color]="filtroActivo === f ? 'primary' : 'medium'"
+      [outline]="filtroActivo !== f"
+      (click)="filtroActivo = f"
+    >
+      <ion-label>{{ labelFiltro(f) }}</ion-label>
+    </ion-chip>
+  </div>
+
+  <p class="resultados-count">{{ tiendrasFiltradas.length }} tiendas encontradas</p>
+
+  <!-- Lista de tiendas -->
+  <div class="tiendas-lista">
+    <div class="tienda-card" *ngFor="let t of tiendrasFiltradas">
+
+      <div class="tienda-header">
+        <div class="tienda-icon" [style.background]="t.color + '20'" [style.color]="t.color">
+          <ion-icon [name]="t.icon + '-outline'"></ion-icon>
+        </div>
+        <div class="tienda-info">
+          <div class="tienda-nombre-row">
+            <h3>{{ t.nombre }}</h3>
+            <ion-badge [color]="t.abierto ? 'success' : 'medium'">
+              {{ t.abierto ? 'Abierto' : 'Cerrado' }}
+            </ion-badge>
+          </div>
+          <p class="tienda-tipo">{{ labelFiltro(t.tipo) }}</p>
+        </div>
+        <div class="distancia-badge">
+          <ion-icon name="navigate-outline"></ion-icon>
+          <span>{{ t.distancia }}</span>
+        </div>
+      </div>
+
+      <div class="tienda-body">
+        <p class="direccion">
+          <ion-icon name="location-outline"></ion-icon>
+          {{ t.direccion }}
+        </p>
+        <p class="horario">
+          <ion-icon name="time-outline"></ion-icon>
+          {{ t.horario }}
+        </p>
+
+        <!-- Valoración -->
+        <div class="valoracion-row">
+          <ion-icon
+            *ngFor="let s of estrellas(t.valoracion)"
+            [name]="s"
+            class="star-icon"
+          ></ion-icon>
+          <span class="val-num">{{ t.valoracion }}</span>
+          <span class="val-reseñas">({{ t.reseñas }} reseñas)</span>
+        </div>
+
+        <!-- Especialidades -->
+        <div class="especialidades">
+          <ion-chip
+            *ngFor="let e of t.especialidades"
+            outline
+            color="primary"
+            class="chip-small"
+          >
+            <ion-label>{{ e }}</ion-label>
+          </ion-chip>
+        </div>
+      </div>
+
+      <div class="tienda-footer">
+        <ion-button fill="clear" size="small" color="primary">
+          <ion-icon slot="start" name="navigate-outline"></ion-icon>
+          Cómo llegar
+        </ion-button>
+        <ion-button fill="clear" size="small" color="primary">
+          <ion-icon slot="start" name="call-outline"></ion-icon>
+          Llamar
+        </ion-button>
+        <ion-button fill="clear" size="small" color="primary">
+          <ion-icon slot="start" name="pricetag-outline"></ion-icon>
+          Ver precios
+        </ion-button>
+      </div>
+
+    </div>
+  </div>
+
+</ion-content>

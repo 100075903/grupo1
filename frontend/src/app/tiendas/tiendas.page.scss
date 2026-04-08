@@ -1,0 +1,147 @@
+.mapa-placeholder {
+  height: 140px;
+  background: #e8f4fb;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+
+  ion-icon { font-size: 32px; color: #1B6CA8; margin-bottom: 4px; }
+  span { font-size: 12px; color: #555; }
+
+  .mapa-pins {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .pin {
+    position: absolute;
+    ion-icon { font-size: 22px; }
+  }
+  .pin-1 { top: 40%; left: 45%; }
+  .pin-2 { top: 25%; left: 60%; }
+  .pin-3 { top: 55%; left: 30%; }
+}
+
+.filtros-scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 12px 16px;
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+
+  ion-chip { flex-shrink: 0; font-size: 12px; }
+}
+
+.resultados-count {
+  font-size: 12px;
+  color: var(--ion-color-medium);
+  padding: 0 16px 8px;
+  font-weight: 500;
+}
+
+.tiendas-lista {
+  padding: 0 12px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tienda-card {
+  background: var(--ion-color-light);
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,0.07);
+  overflow: hidden;
+}
+
+.tienda-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 14px 8px;
+}
+
+.tienda-icon {
+  width: 42px; height: 42px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  ion-icon { font-size: 22px; }
+}
+
+.tienda-info {
+  flex: 1;
+
+  .tienda-nombre-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    margin-bottom: 2px;
+
+    h3 { font-size: 14px; font-weight: 700; }
+    ion-badge { font-size: 10px; }
+  }
+
+  .tienda-tipo { font-size: 11px; color: var(--ion-color-medium); }
+}
+
+.distancia-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 11px;
+  color: var(--ion-color-primary);
+  font-weight: 600;
+  flex-shrink: 0;
+
+  ion-icon { font-size: 14px; margin-bottom: 1px; }
+}
+
+.tienda-body {
+  padding: 0 14px 8px;
+  border-top: 1px solid rgba(0,0,0,0.05);
+  padding-top: 8px;
+
+  p { font-size: 12px; color: var(--ion-color-medium); margin-bottom: 4px;
+    display: flex; align-items: center; gap: 4px;
+    ion-icon { font-size: 13px; flex-shrink: 0; }
+  }
+}
+
+.valoracion-row {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin: 8px 0;
+
+  .star-icon { font-size: 13px; color: #f59e0b; }
+  .val-num { font-size: 13px; font-weight: 700; margin-left: 2px; color: var(--ion-color-dark); }
+  .val-reseñas { font-size: 11px; color: var(--ion-color-medium); }
+}
+
+.especialidades {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.chip-small {
+  height: 24px;
+  font-size: 10px;
+  --padding-start: 8px;
+  --padding-end: 8px;
+}
+
+.tienda-footer {
+  display: flex;
+  border-top: 1px solid rgba(0,0,0,0.06);
+  padding: 4px 6px;
+
+  ion-button { flex: 1; font-size: 11px; }
+}

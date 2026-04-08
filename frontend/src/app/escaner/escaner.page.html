@@ -1,0 +1,98 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Escáner de Productos</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="scanner-content">
+
+  <!-- Vista de cámara simulada -->
+  <div class="camera-view" [class.scanning]="escaneando">
+
+    <div class="overlay-top"></div>
+
+    <div class="scan-frame" [class.active]="escaneando">
+      <div class="corner tl"></div>
+      <div class="corner tr"></div>
+      <div class="corner bl"></div>
+      <div class="corner br"></div>
+      <div class="scan-line" *ngIf="escaneando"></div>
+    </div>
+
+    <div class="overlay-bottom"></div>
+
+    <p class="scan-instruction" *ngIf="!productoDetectado && !escaneando">
+      <ion-icon name="barcode-outline"></ion-icon><br>
+      Apunta la cámara al código<br>de barras del producto
+    </p>
+
+    <p class="scan-instruction" *ngIf="escaneando">
+      <ion-icon name="radio-button-on" class="pulse"></ion-icon><br>
+      Escaneando...
+    </p>
+
+  </div>
+
+  <!-- Resultado del escaneo -->
+  <div class="resultado-panel" *ngIf="productoDetectado && !agregadoExitoso">
+    <div class="resultado-header">
+      <ion-icon name="checkmark-circle" color="success"></ion-icon>
+      <span>Producto encontrado</span>
+    </div>
+
+    <div class="producto-info">
+      <h2>{{ productoDetectado.nombre }}</h2>
+      <p class="marca">{{ productoDetectado.marca }} · {{ productoDetectado.categoria }}</p>
+      <p class="codigo"><ion-icon name="barcode-outline"></ion-icon> {{ productoDetectado.codigo }}</p>
+    </div>
+
+    <div class="precio-row">
+      <span class="precio">RD${{ productoDetectado.precio }}</span>
+      <ion-chip color="primary" outline>
+        <ion-label>{{ productoDetectado.categoria }}</ion-label>
+      </ion-chip>
+    </div>
+
+    <div class="cantidad-row">
+      <ion-label>Cantidad:</ion-label>
+      <ion-button fill="clear" (click)="cantidad = cantidad > 1 ? cantidad - 1 : 1">
+        <ion-icon slot="icon-only" name="remove-circle-outline"></ion-icon>
+      </ion-button>
+      <strong>{{ cantidad }}</strong>
+      <ion-button fill="clear" (click)="cantidad = cantidad + 1">
+        <ion-icon slot="icon-only" name="add-circle-outline"></ion-icon>
+      </ion-button>
+    </div>
+
+    <div class="action-buttons">
+      <ion-button expand="block" color="primary" (click)="agregarALista()">
+        <ion-icon slot="start" name="cart-outline"></ion-icon>
+        Agregar a la lista
+      </ion-button>
+      <ion-button expand="block" fill="outline" color="medium" (click)="iniciarEscaneo()">
+        <ion-icon slot="start" name="scan-outline"></ion-icon>
+        Escanear otro
+      </ion-button>
+    </div>
+  </div>
+
+  <!-- Éxito -->
+  <div class="exito-panel" *ngIf="agregadoExitoso">
+    <ion-icon name="checkmark-circle" color="success"></ion-icon>
+    <h3>¡Agregado a la lista!</h3>
+  </div>
+
+  <!-- Botón principal de escaneo -->
+  <div class="scan-btn-wrap" *ngIf="!productoDetectado && !agregadoExitoso">
+    <ion-button
+      expand="block"
+      [color]="escaneando ? 'danger' : 'primary'"
+      (click)="escaneando ? cancelarEscaneo() : iniciarEscaneo()"
+      class="scan-main-btn"
+    >
+      <ion-icon slot="start" [name]="escaneando ? 'close-outline' : 'scan-outline'"></ion-icon>
+      {{ escaneando ? 'Cancelar' : 'Iniciar escaneo' }}
+    </ion-button>
+  </div>
+
+</ion-content>

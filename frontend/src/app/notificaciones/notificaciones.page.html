@@ -1,0 +1,68 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/lista"></ion-back-button>
+    </ion-buttons>
+    <ion-title>
+      Notificaciones
+      <ion-badge *ngIf="noLeidas > 0" color="danger">{{ noLeidas }}</ion-badge>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="marcarTodasLeidas()" *ngIf="noLeidas > 0">
+        <ion-icon slot="icon-only" name="checkmark-done-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+
+  <!-- Segmento filtro -->
+  <ion-segment [(ngModel)]="filtro" color="primary" class="segmento">
+    <ion-segment-button value="todas">
+      <ion-label>Todas</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="no-leidas">
+      <ion-label>No leídas ({{ noLeidas }})</ion-label>
+    </ion-segment-button>
+  </ion-segment>
+
+  <!-- Lista -->
+  <ion-list lines="none" class="notif-list">
+    <div
+      class="notif-item"
+      *ngFor="let n of filtradas"
+      [class.no-leida]="!n.leida"
+    >
+      <div class="avatar" [style.background]="n.color + '22'" [style.color]="n.color">
+        {{ n.iniciales }}
+      </div>
+
+      <div class="notif-body">
+        <div class="notif-text">
+          <strong>{{ n.usuario }}</strong>
+          <span [attr.data-accion]="n.accion"> {{ n.accion }} </span>
+          <span class="producto-ref">{{ n.producto }}</span>
+        </div>
+        <div class="notif-meta">
+          <ion-icon
+            [name]="accionIcon(n.accion)"
+            [color]="accionColor(n.accion)"
+            class="accion-icon"
+          ></ion-icon>
+          <span class="tiempo">{{ n.tiempo }}</span>
+        </div>
+      </div>
+
+      <div class="unread-dot" *ngIf="!n.leida"></div>
+    </div>
+  </ion-list>
+
+  <!-- Vacío -->
+  <div class="empty-state" *ngIf="filtradas.length === 0">
+    <ion-icon name="notifications-off-outline"></ion-icon>
+    <h3>Sin notificaciones</h3>
+    <p>Todo está al día</p>
+  </div>
+
+</ion-content>
