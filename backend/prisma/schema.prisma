@@ -1,0 +1,151 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum RolFamilia {
+  ADMIN
+  MIEMBRO
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  nombre       String
+  createdAt    DateTime @default(now())
+
+  miembros      FamiliaMiembro[]
+  resenas       ResenaTienda[]
+  preciosReport PrecioReporte[]
+  notificaciones Notificacion[]
+}
+
+model Familia {
+  id              String   @id @default(cuid())
+  nombre          String
+  codigoInvitacion String  @unique
+  createdById     String
+  createdAt       DateTime @default(now())
+
+  miembros  FamiliaMiembro[]
+  listas    ListaCompra[]
+  historial HistorialItem[]
+}
+
+model FamiliaMiembro {
+  id        String     @id @default(cuid())
+  familiaId String
+  userId    String
+  rol       RolFamilia @default(MIEMBRO)
+  joinedAt  DateTime   @default(now())
+
+  familia Familia @relation(fields: [familiaId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([familiaId, userId])
+}
+
+model ListaCompra {
+  id        String   @id @default(cuid())
+  familiaId String
+  nombre    String   @default("Lista principal")
+  createdAt DateTime @default(now())
+
+  familia  Familia        @relation(fields: [familiaId], references: [id], onDelete: Cascade)
+  productos ProductoLista[]
+}
+
+model ProductoLista {
+  id         String   @id @default(cuid())
+  listaId    String
+  nombre     String
+  cantidad   Float    @default(1)
+  notas      String?
+  completado Boolean  @default(false)
+  barcode    String?
+  createdAt  DateTime @default(now())
+
+  lista ListaCompra @relation(fields: [listaId], references: [id], onDelete: Cascade)
+}
+
+model Producto {
+  id        String   @id @default(cuid())
+  barcode   String?  @unique
+  nombre    String
+  marca     String?
+  imagenUrl String?
+  createdAt DateTime @default(now())
+
+  precios PrecioReporte[]
+}
+
+model Tienda {
+  id        String   @id @default(cuid())
+  nombre    String
+  tipo      String?
+  lat       Float
+  lng       Float
+  direccion String?
+  horario   String?
+  abiertoAhora Boolean @default(true)
+  createdAt DateTime @default(now())
+
+  precios PrecioReporte[]
+  resenas ResenaTienda[]
+}
+
+model PrecioReporte {
+  id         String   @id @default(cuid())
+  productoId String
+  tiendaId   String
+  precio     Float
+  userId     String?
+  lat        Float?
+  lng        Float?
+  createdAt  DateTime @default(now())
+
+  producto Producto @relation(fields: [productoId], references: [id], onDelete: Cascade)
+  tienda   Tienda   @relation(fields: [tiendaId], references: [id], onDelete: Cascade)
+  user     User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+model ResenaTienda {
+  id        String   @id @default(cuid())
+  tiendaId  String
+  userId    String
+  rating    Int
+  comentario String?
+  createdAt DateTime @default(now())
+
+  tienda Tienda @relation(fields: [tiendaId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([tiendaId, userId])
+}
+
+model HistorialItem {
+  id             String   @id @default(cuid())
+  familiaId      String
+  productoNombre String
+  cantidad       Float    @default(1)
+  metadata       String?
+  createdAt      DateTime @default(now())
+
+  familia Familia @relation(fields: [familiaId], references: [id], onDelete: Cascade)
+}
+
+model Notificacion {
+  id        String   @id @default(cuid())
+  userId    String
+  titulo    String
+  mensaje   String
+  leida     Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
