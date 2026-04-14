@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 import { HistorialPage } from './historial.page';
+import { CantidadesModalComponent } from './cantidades-modal.component';
 import { RouterModule } from '@angular/router';
 
 @NgModule({
@@ -12,6 +13,6 @@ import { RouterModule } from '@angular/router';
     IonicModule,
     RouterModule.forChild([{ path: '', component: HistorialPage }])
   ],
-  declarations: [HistorialPage]
+  declarations: [HistorialPage, CantidadesModalComponent]
 })
 export class HistorialModule {}

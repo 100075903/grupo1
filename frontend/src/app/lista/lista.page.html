@@ -5,16 +5,24 @@
     </ion-buttons>
     <ion-title>Compras RD</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="agregarProducto()">
-        <ion-icon slot="icon-only" name="add-outline"></ion-icon>
+      <ion-button *ngIf="!auth.isAuthenticated" (click)="profile.mostrarAcercaDe()">
+        <ion-icon slot="icon-only" name="information-circle-outline"></ion-icon>
       </ion-button>
-      <ion-button routerLink="/tabs/notificaciones">
-        <ion-icon slot="icon-only" name="notifications-outline"></ion-icon>
-      </ion-button>
+      <ng-container *ngIf="auth.isAuthenticated">
+        <ion-button (click)="agregarProducto()">
+          <ion-icon slot="icon-only" name="add-outline"></ion-icon>
+        </ion-button>
+        <ion-button routerLink="/tabs/notificaciones">
+          <ion-icon slot="icon-only" name="notifications-outline"></ion-icon>
+        </ion-button>
+        <ion-button (click)="profile.abrirPerfil()">
+          <ion-icon slot="icon-only" name="person-circle-outline"></ion-icon>
+        </ion-button>
+      </ng-container>
     </ion-buttons>
   </ion-toolbar>
 
-  <ion-toolbar color="primary">
+  <ion-toolbar color="primary" *ngIf="auth.isAuthenticated">
     <ion-searchbar
       [(ngModel)]="busqueda"
       placeholder="Buscar producto..."
@@ -22,118 +30,176 @@
       color="light"
     ></ion-searchbar>
   </ion-toolbar>
+  <ion-progress-bar *ngIf="cargando" type="indeterminate" color="light"></ion-progress-bar>
 </ion-header>
 
 <ion-content>
 
-  <!-- Resumen superior -->
-  <div class="resumen-bar">
-    <div class="resumen-item">
-      <ion-icon name="people-outline" color="primary"></ion-icon>
-      <span>{{ integrantes.length }} activos</span>
+  <!-- ── NOT LOGGED IN ─────────────────────────────────────────── -->
+  <ng-container *ngIf="!auth.isAuthenticated">
+    <div class="login-gate">
+      <ion-icon name="lock-closed-outline"></ion-icon>
+      <h2>Favor de loguearse</h2>
+      <p>Inicia sesión para ver y gestionar<br>tu lista de compras familiar.</p>
+      <ion-button expand="block" color="primary" (click)="abrirLogin()">
+        <ion-icon name="log-in-outline" style="margin-right:8px;color:white"></ion-icon>
+        Iniciar sesión
+      </ion-button>
+      <ion-button expand="block" fill="outline" color="primary" (click)="abrirRegistro()">
+        <ion-icon name="person-add-outline" style="margin-right:8px"></ion-icon>
+        Crear cuenta
+      </ion-button>
     </div>
-    <div class="resumen-item">
-      <ion-icon name="cube-outline" color="primary"></ion-icon>
-      <span>{{ pendientes.length }} pendientes</span>
+  </ng-container>
+
+  <!-- ── LOGGED IN ─────────────────────────────────────────────── -->
+  <ng-container *ngIf="auth.isAuthenticated">
+
+    <!-- Familia banner: logged in but no familia set -->
+    <ion-card *ngIf="!auth.familiaId" color="warning" style="margin:12px">
+      <ion-card-content style="display:flex;align-items:center;gap:12px;padding:12px">
+        <ion-icon name="people-outline" style="font-size:28px;flex-shrink:0"></ion-icon>
+        <div style="flex:1">
+          <strong>Sin familia asignada</strong>
+          <p style="font-size:13px;margin:2px 0 0">Crea o únete a un grupo familiar.</p>
+        </div>
+        <ion-button size="small" fill="solid" color="dark" (click)="pedirFamilia()">Configurar</ion-button>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Familia banner: in a family — show code button -->
+    <ion-card *ngIf="auth.familiaId" color="light" style="margin:12px 12px 0">
+      <ion-card-content style="display:flex;align-items:center;gap:12px;padding:10px 12px">
+        <ion-icon name="people-circle-outline" color="primary" style="font-size:26px;flex-shrink:0"></ion-icon>
+        <div style="flex:1">
+          <strong style="font-size:13px">{{ auth.familiaNombre || 'Mi familia' }}</strong>
+          <p style="font-size:11px;color:#666;margin:1px 0 0">Toca para ver el código de invitación</p>
+        </div>
+        <ion-button size="small" fill="outline" color="primary" (click)="verCodigoFamilia()">
+          <ion-icon slot="start" name="key-outline"></ion-icon>
+          Código
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Resumen superior -->
+    <div class="resumen-bar">
+      <div class="resumen-item">
+        <ion-icon name="people-outline" color="primary"></ion-icon>
+        <span>{{ integrantes.length }} activos</span>
+      </div>
+      <div class="resumen-item">
+        <ion-icon name="cube-outline" color="primary"></ion-icon>
+        <span>{{ pendientes.length }} pendientes</span>
+      </div>
+      <div class="resumen-item">
+        <ion-icon name="cash-outline" color="primary"></ion-icon>
+        <span>RD${{ totalEstimado | number:'1.2-2' }}</span>
+      </div>
     </div>
-    <div class="resumen-item">
-      <ion-icon name="cash-outline" color="primary"></ion-icon>
-      <span>RD${{ totalEstimado | number }}</span>
+
+    <!-- Hint de gestos -->
+    <div class="swipe-hint">
+      <span>Marcar comprado <ion-icon name="arrow-forward-outline"></ion-icon></span>
+      <span><ion-icon name="arrow-back-outline"></ion-icon> Eliminar</span>
     </div>
-  </div>
 
-  <!-- Hint de gestos -->
-  <div class="swipe-hint">
-    <span><ion-icon name="arrow-back-outline"></ion-icon> Eliminar</span>
-    <span>Marcar comprado <ion-icon name="arrow-forward-outline"></ion-icon></span>
-  </div>
+    <!-- Pendientes -->
+    <ion-list *ngIf="pendientes.length > 0">
+      <ion-list-header>
+        <ion-label>Pendientes ({{ pendientes.length }})</ion-label>
+      </ion-list-header>
 
-  <!-- Pendientes -->
-  <ion-list *ngIf="pendientes.length > 0">
-    <ion-list-header>
-      <ion-label>Pendientes ({{ pendientes.length }})</ion-label>
-    </ion-list-header>
+      <ion-item-sliding *ngFor="let p of pendientes">
 
-    <ion-item-sliding *ngFor="let p of pendientes">
+        <ion-item-options side="start" (ionSwipe)="toggleComprado(p.id)">
+          <ion-item-option color="success" expandable (click)="toggleComprado(p.id)">
+            <ion-icon slot="icon-only" name="checkmark-outline"></ion-icon>
+          </ion-item-option>
+        </ion-item-options>
 
-      <!-- Swipe izquierdo → Eliminar -->
-      <ion-item-options side="start" (ionSwipe)="eliminar(p.id)">
-        <ion-item-option color="danger" expandable (click)="eliminar(p.id)">
-          <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
-        </ion-item-option>
-      </ion-item-options>
+        <ion-item>
+          <ion-checkbox
+            slot="start"
+            [checked]="p.comprado"
+            (ionChange)="toggleComprado(p.id)"
+            color="primary"
+          ></ion-checkbox>
+          <ion-label>
+            <h3>{{ p.nombre }}</h3>
+            <p>×{{ p.cantidad }} · agregado por {{ p.agregadoPor }}</p>
+          </ion-label>
+          <ion-note slot="end" color="medium">RD${{ p.precio * p.cantidad | number:'1.2-2' }}</ion-note>
+        </ion-item>
 
-      <ion-item>
-        <ion-checkbox
-          slot="start"
-          [(ngModel)]="p.comprado"
-          (ngModelChange)="toggleComprado(p.id)"
-          color="primary"
-        ></ion-checkbox>
-        <ion-label>
-          <h3>{{ p.nombre }}</h3>
-          <p>×{{ p.cantidad }} · agregado por {{ p.agregadoPor }}</p>
-        </ion-label>
-        <ion-note slot="end" color="medium">RD${{ p.precio | number }}</ion-note>
-      </ion-item>
+        <ion-item-options side="end" (ionSwipe)="eliminar(p.id)">
+          <ion-item-option color="danger" expandable (click)="eliminar(p.id)">
+            <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+          </ion-item-option>
+        </ion-item-options>
 
-      <!-- Swipe derecho → Marcar comprado -->
-      <ion-item-options side="end" (ionSwipe)="toggleComprado(p.id)">
-        <ion-item-option color="success" expandable (click)="toggleComprado(p.id)">
-          <ion-icon slot="icon-only" name="checkmark-outline"></ion-icon>
-        </ion-item-option>
-      </ion-item-options>
+      </ion-item-sliding>
+    </ion-list>
 
-    </ion-item-sliding>
-  </ion-list>
+    <!-- Finalizar compra -->
+    <div *ngIf="comprados.length > 0" style="padding: 8px 16px 0">
+      <ion-button expand="block" color="success" (click)="finalizarCompra()">
+        <ion-icon slot="start" name="bag-check-outline"></ion-icon>
+        Finalizar compra ({{ comprados.length }})
+      </ion-button>
+    </div>
 
-  <!-- Comprados -->
-  <ion-list *ngIf="comprados.length > 0">
-    <ion-list-header>
-      <ion-label color="medium">Comprados ({{ comprados.length }})</ion-label>
-    </ion-list-header>
+    <!-- Comprados -->
+    <ion-list *ngIf="comprados.length > 0">
+      <ion-list-header>
+        <ion-label color="medium">Comprados ({{ comprados.length }})</ion-label>
+      </ion-list-header>
 
-    <ion-item-sliding *ngFor="let p of comprados">
-      <ion-item-options side="start" (ionSwipe)="eliminar(p.id)">
-        <ion-item-option color="danger" expandable (click)="eliminar(p.id)">
-          <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
-        </ion-item-option>
-      </ion-item-options>
+      <ion-item-sliding *ngFor="let p of comprados">
 
-      <ion-item class="comprado">
-        <ion-checkbox
-          slot="start"
-          [(ngModel)]="p.comprado"
-          (ngModelChange)="toggleComprado(p.id)"
-          color="primary"
-        ></ion-checkbox>
-        <ion-label>
-          <h3 class="tachado">{{ p.nombre }}</h3>
-          <p>×{{ p.cantidad }}</p>
-        </ion-label>
-        <ion-note slot="end" color="medium">RD${{ p.precio | number }}</ion-note>
-      </ion-item>
+        <ion-item-options side="start" (ionSwipe)="toggleComprado(p.id)">
+          <ion-item-option color="medium" expandable (click)="toggleComprado(p.id)">
+            <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+          </ion-item-option>
+        </ion-item-options>
 
-      <ion-item-options side="end">
-        <ion-item-option color="medium" (click)="toggleComprado(p.id)">
-          <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
-        </ion-item-option>
-      </ion-item-options>
-    </ion-item-sliding>
-  </ion-list>
+        <ion-item class="comprado">
+          <ion-checkbox
+            slot="start"
+            [checked]="p.comprado"
+            (ionChange)="toggleComprado(p.id)"
+            color="primary"
+          ></ion-checkbox>
+          <ion-label>
+            <h3 class="tachado">{{ p.nombre }}</h3>
+            <p>×{{ p.cantidad }}</p>
+          </ion-label>
+          <ion-note slot="end" color="medium">RD${{ p.precio * p.cantidad | number:'1.2-2' }}</ion-note>
+        </ion-item>
 
-  <!-- Estado vacío -->
-  <div class="empty-state" *ngIf="pendientes.length === 0 && comprados.length === 0">
-    <ion-icon name="basket-outline"></ion-icon>
-    <h3>Lista vacía</h3>
-    <p>Toca + para agregar productos</p>
-  </div>
+        <ion-item-options side="end" (ionSwipe)="eliminar(p.id)">
+          <ion-item-option color="danger" expandable (click)="eliminar(p.id)">
+            <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+          </ion-item-option>
+        </ion-item-options>
 
-  <!-- FAB para agregar -->
-  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-    <ion-fab-button (click)="agregarProducto()" color="primary">
-      <ion-icon name="add"></ion-icon>
-    </ion-fab-button>
-  </ion-fab>
+      </ion-item-sliding>
+    </ion-list>
+
+    <!-- Empty state -->
+    <div class="empty-state" *ngIf="pendientes.length === 0 && comprados.length === 0">
+      <ion-icon name="basket-outline"></ion-icon>
+      <h3>Lista vacía</h3>
+      <p>Toca + para agregar productos</p>
+    </div>
+
+    <!-- FAB -->
+    <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+      <ion-fab-button (click)="agregarProducto()" color="primary">
+        <ion-icon name="add"></ion-icon>
+      </ion-fab-button>
+    </ion-fab>
+
+  </ng-container>
 
 </ion-content>

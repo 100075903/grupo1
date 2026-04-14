@@ -4,7 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 import { EscanerPage } from './escaner.page';
 import { RouterModule } from '@angular/router';
-
 @NgModule({
   imports: [
     CommonModule,

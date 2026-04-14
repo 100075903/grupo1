@@ -1,10 +1,45 @@
 <ion-header>
   <ion-toolbar color="primary">
     <ion-title>Historial de Compras</ion-title>
+    <ion-buttons slot="end">
+      <ion-button *ngIf="auth.isAuthenticated" (click)="profile.abrirPerfil()">
+        <ion-icon slot="icon-only" name="person-circle-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
+  <ion-progress-bar *ngIf="cargando" type="indeterminate" color="light"></ion-progress-bar>
 </ion-header>
 
 <ion-content>
+
+  <!-- Skeleton mientras carga -->
+  <ng-container *ngIf="cargando">
+    <div class="stats-grid">
+      <div class="stat-card" *ngFor="let i of [1,2,3]">
+        <ion-skeleton-text animated style="width:32px;height:32px;border-radius:50%;margin-bottom:8px"></ion-skeleton-text>
+        <ion-skeleton-text animated style="width:70%;height:16px;margin-bottom:4px"></ion-skeleton-text>
+        <ion-skeleton-text animated style="width:50%;height:11px"></ion-skeleton-text>
+      </div>
+    </div>
+    <div style="padding:16px">
+      <ion-skeleton-text animated style="width:40%;height:13px;margin-bottom:16px"></ion-skeleton-text>
+      <div *ngFor="let i of [1,2,3]" style="background:#fff;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+        <ion-skeleton-text animated style="width:55%;height:14px;margin-bottom:8px"></ion-skeleton-text>
+        <ion-skeleton-text animated style="width:40%;height:11px;margin-bottom:12px"></ion-skeleton-text>
+        <ion-skeleton-text animated style="width:100%;height:6px;border-radius:3px"></ion-skeleton-text>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- Empty state -->
+  <div class="empty-state" *ngIf="!cargando && historial.length === 0">
+    <ion-icon name="receipt-outline"></ion-icon>
+    <h3>Sin historial aún</h3>
+    <p>Tus compras finalizadas aparecerán aquí</p>
+  </div>
+
+  <!-- Contenido real -->
+  <ng-container *ngIf="!cargando && historial.length > 0">
 
   <!-- Tarjetas de resumen -->
   <div class="stats-grid">
@@ -98,5 +133,7 @@
       Repetir esta compra
     </ion-button>
   </div>
+
+  </ng-container>
 
 </ion-content>

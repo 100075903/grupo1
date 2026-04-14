@@ -1,6 +1,11 @@
 <ion-header>
   <ion-toolbar color="primary">
     <ion-title>Comparador de Precios</ion-title>
+    <ion-buttons slot="end">
+      <ion-button *ngIf="auth.isAuthenticated" (click)="profile.abrirPerfil()">
+        <ion-icon slot="icon-only" name="person-circle-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
   <ion-toolbar color="primary">
     <ion-searchbar

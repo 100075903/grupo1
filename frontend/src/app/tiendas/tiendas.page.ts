@@ -1,87 +1,93 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy, ViewChild } from '@angular/core';
+import { AlertController, IonContent, ToastController } from '@ionic/angular';
+import { Router } from '@angular/router';
+import * as L from 'leaflet';
+import { ApiService, ApiTienda } from '../services/api.service';
+import { AuthService } from '../services/auth.service';
+import { ProfileService } from '../services/profile.service';
 
 export interface Tienda {
-  id: number;
+  id: string;
   nombre: string;
   tipo: string;
   distancia: string;
   distanciaNum: number;
+  lat: number;
+  lng: number;
   direccion: string;
   horario: string;
   abierto: boolean;
   valoracion: number;
-  reseñas: number;
+  resenas: number;
   icon: string;
   color: string;
   especialidades: string[];
+  telefono?: string;
 }
+
+const DEFAULT_LAT = 18.4861;
+const DEFAULT_LNG = -69.9312;
+
+const ICON_MAP: Record<string, string> = {
+  supermercado: 'storefront', hipermercado: 'business',
+  colmado: 'home', mercado: 'leaf',
+};
+const COLOR_MAP: Record<string, string> = {
+  supermercado: '#1B6CA8', hipermercado: '#16a34a',
+  colmado: '#7c3aed', mercado: '#059669',
+};
+
 
 @Component({
   selector: 'app-tiendas',
   templateUrl: './tiendas.page.html',
   styleUrls: ['./tiendas.page.scss'],
 })
-export class TiendasPage {
+export class TiendasPage implements OnDestroy {
+
+  @ViewChild(IonContent, { static: false }) content!: IonContent;
 
   filtroActivo = 'todos';
   busqueda = '';
+  cargando = false;
+  tiendaSeleccionada: Tienda | null = null;
 
-  tiendas: Tienda[] = [
-    {
-      id: 1, nombre: 'Nacional Supermarket', tipo: 'supermercado',
-      distancia: '0.8 km', distanciaNum: 0.8,
-      direccion: 'Av. San Vicente de Paul, SDE',
-      horario: 'Lun–Dom 7am–10pm', abierto: true,
-      valoracion: 4.5, reseñas: 234,
-      icon: 'storefront', color: '#1B6CA8',
-      especialidades: ['Carnes frescas', 'Panadería', 'Productos locales'],
-    },
-    {
-      id: 2, nombre: 'La Sirena', tipo: 'supermercado',
-      distancia: '1.4 km', distanciaNum: 1.4,
-      direccion: 'Av. Las Américas Km 8, SDE',
-      horario: 'Lun–Dom 8am–9pm', abierto: true,
-      valoracion: 4.2, reseñas: 512,
-      icon: 'storefront', color: '#e11d48',
-      especialidades: ['Electrodomésticos', 'Ropa', 'Alimentos importados'],
-    },
-    {
-      id: 3, nombre: 'Jumbo', tipo: 'hipermercado',
-      distancia: '2.1 km', distanciaNum: 2.1,
-      direccion: 'Av. Charles de Gaulle, SDE',
-      horario: 'Lun–Dom 24 horas', abierto: true,
-      valoracion: 4.3, reseñas: 389,
-      icon: 'business', color: '#16a34a',
-      especialidades: ['Abierto 24h', 'Mayoreo', 'Productos importados'],
-    },
-    {
-      id: 4, nombre: 'Bravo Supermercados', tipo: 'supermercado',
-      distancia: '3.0 km', distanciaNum: 3.0,
-      direccion: 'C/ Mella esq. Duarte, SDE',
-      horario: 'Lun–Sáb 7am–8pm', abierto: false,
-      valoracion: 3.9, reseñas: 98,
-      icon: 'storefront', color: '#d97706',
-      especialidades: ['Precios bajos', 'Frutas y verduras'],
-    },
-    {
-      id: 5, nombre: 'Colmado Don Pepe', tipo: 'colmado',
-      distancia: '0.3 km', distanciaNum: 0.3,
-      direccion: 'C/ 15 #22, Los Girasoles, SDE',
-      horario: 'Lun–Dom 6am–11pm', abierto: true,
-      valoracion: 4.8, reseñas: 67,
-      icon: 'home', color: '#7c3aed',
-      especialidades: ['Más cercano', 'Fiado disponible', 'Delivery rápido'],
-    },
-    {
-      id: 6, nombre: 'MercaSID', tipo: 'mercado',
-      distancia: '4.5 km', distanciaNum: 4.5,
-      direccion: 'Autopista del Este Km 12',
-      horario: 'Mar–Dom 6am–2pm', abierto: false,
-      valoracion: 4.6, reseñas: 143,
-      icon: 'leaf', color: '#059669',
-      especialidades: ['Frutas tropicales', 'Verduras frescas', 'Precios mercado'],
-    },
-  ];
+  // Settings
+  radioKm = 50;
+  soloAbiertos = false;
+  ordenarPor: 'distancia' | 'valoracion' = 'distancia';
+
+  tiendas: Tienda[] = [];
+
+  private map: L.Map | null = null;
+  private markers: L.Marker[] = [];
+  private userLat = DEFAULT_LAT;
+  private userLng = DEFAULT_LNG;
+
+  constructor(
+    private api: ApiService,
+    public auth: AuthService,
+    public profile: ProfileService,
+    private router: Router,
+    private toast: ToastController,
+    private alertCtrl: AlertController,
+  ) {}
+
+  // ── Ionic lifecycle: use ionViewDidEnter so the DOM is ready ─────────────
+
+  ionViewDidEnter(): void {
+    this.cargarTiendas();
+  }
+
+  ionViewWillLeave(): void {
+    this.destroyMap();
+  }
+
+  ngOnDestroy(): void {
+    this.destroyMap();
+  }
+
+  // ── Filters ───────────────────────────────────────────────────────────────
 
   get filtros() {
     return ['todos', 'supermercado', 'hipermercado', 'colmado', 'mercado'];
@@ -90,13 +96,116 @@ export class TiendasPage {
   get tiendrasFiltradas() {
     return this.tiendas
       .filter(t => {
-        const matchFiltro = this.filtroActivo === 'todos' || t.tipo === this.filtroActivo;
+        const matchFiltro   = this.filtroActivo === 'todos' || t.tipo === this.filtroActivo;
+        const matchAbierto  = !this.soloAbiertos || t.abierto;
         const matchBusqueda = !this.busqueda ||
           t.nombre.toLowerCase().includes(this.busqueda.toLowerCase()) ||
           t.especialidades.some(e => e.toLowerCase().includes(this.busqueda.toLowerCase()));
-        return matchFiltro && matchBusqueda;
+        return matchFiltro && matchAbierto && matchBusqueda;
       })
-      .sort((a, b) => a.distanciaNum - b.distanciaNum);
+      .sort((a, b) =>
+        this.ordenarPor === 'valoracion'
+          ? b.valoracion - a.valoracion
+          : a.distanciaNum - b.distanciaNum
+      );
+  }
+
+  async abrirConfiguracion(): Promise<void> {
+    // Step 1 – radio de búsqueda
+    const alertRadio = await this.alertCtrl.create({
+      header: 'Radio de búsqueda',
+      inputs: [
+        { type: 'radio', label: '5 km',  value: 5,  checked: this.radioKm === 5  },
+        { type: 'radio', label: '10 km', value: 10, checked: this.radioKm === 10 },
+        { type: 'radio', label: '25 km', value: 25, checked: this.radioKm === 25 },
+        { type: 'radio', label: '50 km', value: 50, checked: this.radioKm === 50 },
+      ],
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Siguiente',
+          handler: (km: number) => { this.radioKm = Number(km); },
+        },
+      ],
+    });
+    await alertRadio.present();
+    const { role: r1 } = await alertRadio.onDidDismiss();
+    if (r1 === 'cancel') return;
+
+    // Step 2 – filtros y orden
+    const alertFiltros = await this.alertCtrl.create({
+      header: 'Filtros y orden',
+      inputs: [
+        {
+          type: 'checkbox',
+          label: 'Solo tiendas abiertas',
+          value: 'soloAbiertos',
+          checked: this.soloAbiertos,
+        },
+        {
+          type: 'checkbox',
+          label: 'Ordenar por valoración',
+          value: 'valoracion',
+          checked: this.ordenarPor === 'valoracion',
+        },
+      ],
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Aplicar',
+          handler: (vals: string[]) => {
+            this.soloAbiertos = vals.includes('soloAbiertos');
+            this.ordenarPor   = vals.includes('valoracion') ? 'valoracion' : 'distancia';
+            this.cargarTiendas();
+          },
+        },
+      ],
+    });
+    await alertFiltros.present();
+  }
+
+  comoLlegar(t: Tienda, event: Event): void {
+    event.stopPropagation();
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${t.lat},${t.lng}&destination_place_id=${encodeURIComponent(t.nombre)}`;
+    window.open(url, '_blank');
+  }
+
+  async llamar(t: Tienda, event: Event): Promise<void> {
+    event.stopPropagation();
+    if (t.telefono) {
+      window.open(`tel:${t.telefono}`, '_system');
+    } else {
+      const toast = await this.toast.create({
+        message: 'Número de teléfono no disponible',
+        duration: 2000,
+        position: 'bottom',
+        color: 'medium',
+      });
+      await toast.present();
+    }
+  }
+
+  verPrecios(t: Tienda, event: Event): void {
+    event.stopPropagation();
+    this.router.navigate(['/tabs/comparador'], { queryParams: { q: t.nombre } });
+  }
+
+  onFiltroChange(): void {
+    this.tiendaSeleccionada = null;
+    this.actualizarMarkers();
+  }
+
+  seleccionarTienda(t: Tienda): void {
+    this.tiendaSeleccionada = t;
+    this.content?.scrollToTop(400);
+    if (!this.map) return;
+    setTimeout(() => {
+      this.map!.flyTo([t.lat, t.lng], 16, { duration: 0.8 });
+      const idx = this.tiendrasFiltradas.findIndex(x => x.id === t.id);
+      if (idx >= 0 && this.markers[idx]) {
+        setTimeout(() => this.markers[idx].openPopup(), 900);
+      }
+    }, 300);
   }
 
   estrellas(val: number): string[] {
@@ -107,11 +216,157 @@ export class TiendasPage {
     });
   }
 
-  labelFiltro(f: string) {
+  labelFiltro(f: string): string {
     const map: Record<string, string> = {
       todos: 'Todos', supermercado: 'Supermercado',
-      hipermercado: 'Hipermercado', colmado: 'Colmado', mercado: 'Mercado'
+      hipermercado: 'Hipermercado', colmado: 'Colmado', mercado: 'Mercado',
     };
     return map[f] ?? f;
+  }
+
+  // ── Data loading ──────────────────────────────────────────────────────────
+
+  cargarTiendas(): void {
+    this.obtenerUbicacion().then(({ lat, lng }) => {
+      this.userLat = lat;
+      this.userLng = lng;
+      this.initMap(lat, lng);
+
+      this.cargando = true;
+      this.api.getTiendas(lat, lng, undefined, this.soloAbiertos, this.radioKm).subscribe({
+        next: (rows) => {
+          this.cargando = false;
+          this.tiendas = rows.map(t => this.mapApiTienda(t));
+          this.actualizarMarkers();
+        },
+        error: (e) => {
+          this.cargando = false;
+          console.error('[API] getTiendas:', e);
+          this.tiendas = [];
+          this.actualizarMarkers();
+        },
+      });
+    });
+  }
+
+  // ── Map ───────────────────────────────────────────────────────────────────
+
+  private initMap(lat: number, lng: number): void {
+    if (this.map) {
+      this.map.setView([lat, lng], 13);
+      return;
+    }
+
+    const container = document.getElementById('tiendas-map');
+    if (!container) return;
+
+    this.map = L.map('tiendas-map', { zoomControl: true, attributionControl: false }).setView([lat, lng], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+    }).addTo(this.map);
+
+    // User location marker
+    L.marker([lat, lng], { icon: this.buildIcon('#1B6CA8', '📍') })
+      .addTo(this.map)
+      .bindPopup('<b>Tu ubicación</b>')
+      .openPopup();
+  }
+
+  private actualizarMarkers(): void {
+    if (!this.map) return;
+
+    // Remove old store markers
+    this.markers.forEach(m => m.remove());
+    this.markers = [];
+
+    for (const t of this.tiendrasFiltradas) {
+      const marker = L.marker([t.lat, t.lng], { icon: this.buildIcon(t.color, '') })
+        .addTo(this.map!)
+        .bindPopup(`
+          <div style="min-width:160px">
+            <b>${t.nombre}</b><br>
+            <small>${t.direccion}</small><br>
+            <small>${t.horario}</small><br>
+            <span style="color:${t.abierto ? '#16a34a' : '#6b7280'}">
+              ${t.abierto ? '● Abierto' : '○ Cerrado'}
+            </span>
+            &nbsp;·&nbsp;${t.distancia}
+          </div>
+        `);
+      this.markers.push(marker);
+    }
+
+    // Fit map to all visible markers
+    if (this.markers.length > 0) {
+      const group = L.featureGroup(this.markers);
+      this.map!.fitBounds(group.getBounds().pad(0.15));
+    }
+  }
+
+  private buildIcon(color: string, emoji: string): L.DivIcon {
+    return L.divIcon({
+      html: `<div style="
+        background:${color};
+        width:28px;height:28px;
+        border-radius:50% 50% 50% 0;
+        transform:rotate(-45deg);
+        border:2px solid white;
+        box-shadow:0 2px 5px rgba(0,0,0,0.35);
+        display:flex;align-items:center;justify-content:center;
+      ">
+        <span style="transform:rotate(45deg);font-size:12px">${emoji}</span>
+      </div>`,
+      iconSize: [28, 28],
+      iconAnchor: [14, 28],
+      popupAnchor: [0, -30],
+      className: '',
+    });
+  }
+
+  private destroyMap(): void {
+    this.markers.forEach(m => m.remove());
+    this.markers = [];
+    if (this.map) {
+      this.map.remove();
+      this.map = null;
+    }
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+
+  private mapApiTienda(t: ApiTienda): Tienda {
+    const tipo = (t.tipo ?? '').toLowerCase();
+    return {
+      id: t.id,
+      nombre: t.nombre,
+      tipo: t.tipo,
+      distancia: `${t.distancia_km} km`,
+      distanciaNum: t.distancia_km,
+      lat: t.lat,
+      lng: t.lng,
+      direccion: t.direccion,
+      horario: t.horario,
+      abierto: t.abiertoAhora,
+      valoracion: 4.0,
+      resenas: 0,
+      icon: ICON_MAP[tipo] ?? 'storefront',
+      color: COLOR_MAP[tipo] ?? '#1B6CA8',
+      especialidades: [],
+    };
+  }
+
+  private obtenerUbicacion(): Promise<{ lat: number; lng: number }> {
+    return new Promise(resolve => {
+      if (!navigator.geolocation) {
+        resolve({ lat: DEFAULT_LAT, lng: DEFAULT_LNG });
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        pos => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+        _err => resolve({ lat: DEFAULT_LAT, lng: DEFAULT_LNG }),
+        { timeout: 5000 },
+      );
+    });
   }
 }

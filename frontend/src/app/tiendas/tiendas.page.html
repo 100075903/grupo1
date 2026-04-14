@@ -2,8 +2,11 @@
   <ion-toolbar color="primary">
     <ion-title>Tiendas Cercanas</ion-title>
     <ion-buttons slot="end">
-      <ion-button>
+      <ion-button (click)="abrirConfiguracion()">
         <ion-icon slot="icon-only" name="options-outline"></ion-icon>
+      </ion-button>
+      <ion-button *ngIf="auth.isAuthenticated" (click)="profile.abrirPerfil()">
+        <ion-icon slot="icon-only" name="person-circle-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
@@ -14,20 +17,13 @@
       animated
     ></ion-searchbar>
   </ion-toolbar>
+  <ion-progress-bar *ngIf="cargando" type="indeterminate" color="light"></ion-progress-bar>
 </ion-header>
 
 <ion-content>
 
-  <!-- Mapa placeholder -->
-  <div class="mapa-placeholder">
-    <ion-icon name="map-outline"></ion-icon>
-    <span>Vista de mapa · Santo Domingo Este</span>
-    <div class="mapa-pins">
-      <div class="pin pin-1"><ion-icon name="location" color="danger"></ion-icon></div>
-      <div class="pin pin-2"><ion-icon name="location" color="primary"></ion-icon></div>
-      <div class="pin pin-3"><ion-icon name="location" color="primary"></ion-icon></div>
-    </div>
-  </div>
+  <!-- Mapa Leaflet -->
+  <div id="tiendas-map" class="mapa-leaflet"></div>
 
   <!-- Filtros por categoría -->
   <div class="filtros-scroll">
@@ -35,17 +31,45 @@
       *ngFor="let f of filtros"
       [color]="filtroActivo === f ? 'primary' : 'medium'"
       [outline]="filtroActivo !== f"
-      (click)="filtroActivo = f"
+      (click)="filtroActivo = f; onFiltroChange()"
     >
       <ion-label>{{ labelFiltro(f) }}</ion-label>
     </ion-chip>
   </div>
 
-  <p class="resultados-count">{{ tiendrasFiltradas.length }} tiendas encontradas</p>
+  <p class="resultados-count" *ngIf="!cargando">{{ tiendrasFiltradas.length }} tiendas encontradas</p>
+
+  <!-- Skeleton mientras carga -->
+  <div class="tiendas-lista" *ngIf="cargando">
+    <div class="tienda-card" *ngFor="let i of [1,2,3]">
+      <div class="tienda-header">
+        <div class="tienda-icon" style="background:#f0f0f0">
+          <ion-skeleton-text animated style="width:24px;height:24px;border-radius:50%"></ion-skeleton-text>
+        </div>
+        <div class="tienda-info" style="flex:1">
+          <ion-skeleton-text animated style="width:60%;height:14px;margin-bottom:6px"></ion-skeleton-text>
+          <ion-skeleton-text animated style="width:35%;height:11px"></ion-skeleton-text>
+        </div>
+      </div>
+      <div class="tienda-body">
+        <ion-skeleton-text animated style="width:80%;height:11px;margin-bottom:6px"></ion-skeleton-text>
+        <ion-skeleton-text animated style="width:55%;height:11px"></ion-skeleton-text>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty state -->
+  <div class="empty-state" *ngIf="!cargando && tiendrasFiltradas.length === 0">
+    <ion-icon name="storefront-outline"></ion-icon>
+    <h3>Sin tiendas cercanas</h3>
+    <p>No se encontraron tiendas en el radio seleccionado</p>
+  </div>
 
   <!-- Lista de tiendas -->
-  <div class="tiendas-lista">
-    <div class="tienda-card" *ngFor="let t of tiendrasFiltradas">
+  <div class="tiendas-lista" *ngIf="!cargando">
+    <div class="tienda-card" *ngFor="let t of tiendrasFiltradas"
+         [class.seleccionada]="tiendaSeleccionada?.id === t.id"
+         (click)="seleccionarTienda(t)">
 
       <div class="tienda-header">
         <div class="tienda-icon" [style.background]="t.color + '20'" [style.color]="t.color">
@@ -84,7 +108,7 @@
             class="star-icon"
           ></ion-icon>
           <span class="val-num">{{ t.valoracion }}</span>
-          <span class="val-reseñas">({{ t.reseñas }} reseñas)</span>
+          <span class="val-reseñas">({{ t.resenas }} reseñas)</span>
         </div>
 
         <!-- Especialidades -->
@@ -101,15 +125,15 @@
       </div>
 
       <div class="tienda-footer">
-        <ion-button fill="clear" size="small" color="primary">
+        <ion-button fill="clear" size="small" color="primary" (click)="comoLlegar(t, $event)">
           <ion-icon slot="start" name="navigate-outline"></ion-icon>
           Cómo llegar
         </ion-button>
-        <ion-button fill="clear" size="small" color="primary">
+        <ion-button fill="clear" size="small" color="primary" (click)="llamar(t, $event)">
           <ion-icon slot="start" name="call-outline"></ion-icon>
           Llamar
         </ion-button>
-        <ion-button fill="clear" size="small" color="primary">
+        <ion-button fill="clear" size="small" color="primary" (click)="verPrecios(t, $event)">
           <ion-icon slot="start" name="pricetag-outline"></ion-icon>
           Ver precios
         </ion-button>

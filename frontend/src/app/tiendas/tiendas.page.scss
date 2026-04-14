@@ -1,30 +1,15 @@
-.mapa-placeholder {
-  height: 140px;
-  background: #e8f4fb;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-  border-bottom: 1px solid rgba(0,0,0,0.08);
+.mapa-leaflet {
+  height: 220px;
+  width: 100%;
+  border-bottom: 1px solid rgba(0,0,0,0.10);
+  z-index: 0;
 
-  ion-icon { font-size: 32px; color: #1B6CA8; margin-bottom: 4px; }
-  span { font-size: 12px; color: #555; }
-
-  .mapa-pins {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
+  // Leaflet popups look better with a small font in mobile
+  :global(.leaflet-popup-content) {
+    font-size: 13px;
+    line-height: 1.5;
+    margin: 10px 12px;
   }
-
-  .pin {
-    position: absolute;
-    ion-icon { font-size: 22px; }
-  }
-  .pin-1 { top: 40%; left: 45%; }
-  .pin-2 { top: 25%; left: 60%; }
-  .pin-3 { top: 55%; left: 30%; }
 }
 
 .filtros-scroll {
@@ -57,6 +42,13 @@
   border-radius: 14px;
   border: 1px solid rgba(0,0,0,0.07);
   overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+
+  &.seleccionada {
+    border-color: var(--ion-color-primary);
+    box-shadow: 0 0 0 2px rgba(var(--ion-color-primary-rgb), 0.25);
+  }
 }
 
 .tienda-header {
@@ -144,4 +136,16 @@
   padding: 4px 6px;
 
   ion-button { flex: 1; font-size: 11px; }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60px 32px;
+  color: var(--ion-color-medium);
+  text-align: center;
+  ion-icon { font-size: 64px; margin-bottom: 16px; opacity: 0.4; }
+  h3 { font-size: 18px; font-weight: 600; margin: 0 0 8px; }
+  p  { font-size: 14px; margin: 0; opacity: 0.7; }
 }

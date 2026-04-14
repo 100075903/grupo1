@@ -60,6 +60,21 @@ router.post(
 
 router.use(requireAuth);
 
+router.patch(
+  "/auth/cambiar-password",
+  [
+    body("currentPassword").isString().isLength({ min: 1, max: 128 }),
+    body("newPassword").isString().isLength({ min: 8, max: 128 }),
+  ],
+  validate,
+  asyncHandler(authController.cambiarPassword)
+);
+
+router.get(
+  "/familias/mia",
+  asyncHandler(familiaController.mia)
+);
+
 router.post(
   "/familias",
   [body("nombre").isString().trim().isLength({ min: 1, max: 120 })],
@@ -88,6 +103,14 @@ router.get(
   validate,
   requireFamiliaMember(),
   asyncHandler(listaController.porFamilia)
+);
+
+// SSE stream — auth via ?token= query param (EventSource cannot set headers)
+router.get(
+  "/listas/:lista_id/events",
+  [param("lista_id").isString().notEmpty()],
+  validate,
+  asyncHandler(listaController.eventos)
 );
 
 router.post(
