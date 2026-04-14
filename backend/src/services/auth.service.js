@@ -23,6 +23,21 @@ export async function register(data) {
   return { user, token };
 }
 
+export async function cambiarPassword(userId, currentPassword, newPassword) {
+  if (newPassword.length < 8) {
+    throw new AppError(400, "La nueva contraseña debe tener al menos 8 caracteres");
+  }
+
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) throw new AppError(404, "Usuario no encontrado");
+
+  const ok = await bcrypt.compare(currentPassword, user.passwordHash);
+  if (!ok) throw new AppError(401, "La contraseña actual es incorrecta");
+
+  const passwordHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
+  await prisma.user.update({ where: { id: userId }, data: { passwordHash } });
+}
+
 export async function login(data) {
   const email = data.email.trim().toLowerCase();
   const user = await prisma.user.findUnique({ where: { email } });

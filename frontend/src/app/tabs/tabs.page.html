@@ -7,22 +7,22 @@
       <ion-label>Lista</ion-label>
     </ion-tab-button>
 
-    <ion-tab-button tab="tiendas" href="/tabs/tiendas">
+    <ion-tab-button tab="tiendas" href="/tabs/tiendas" [disabled]="!auth.isAuthenticated">
       <ion-icon name="location-outline"></ion-icon>
       <ion-label>Tiendas</ion-label>
     </ion-tab-button>
 
-    <ion-tab-button tab="escaner" href="/tabs/escaner">
+    <ion-tab-button tab="escaner" href="/tabs/escaner" [disabled]="!auth.isAuthenticated">
       <ion-icon name="scan-outline"></ion-icon>
       <ion-label>Escáner</ion-label>
     </ion-tab-button>
 
-    <ion-tab-button tab="comparador" href="/tabs/comparador">
+    <ion-tab-button tab="comparador" href="/tabs/comparador" [disabled]="!auth.isAuthenticated">
       <ion-icon name="cart-outline"></ion-icon>
       <ion-label>Precios</ion-label>
     </ion-tab-button>
 
-    <ion-tab-button tab="historial" href="/tabs/historial">
+    <ion-tab-button tab="historial" href="/tabs/historial" [disabled]="!auth.isAuthenticated">
       <ion-icon name="time-outline"></ion-icon>
       <ion-label>Historial</ion-label>
     </ion-tab-button>

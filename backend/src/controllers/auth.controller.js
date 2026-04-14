@@ -9,3 +9,12 @@ export async function login(req, res) {
   const result = await authService.login(req.body);
   res.json(result);
 }
+
+export async function cambiarPassword(req, res) {
+  await authService.cambiarPassword(
+    req.user.sub,
+    req.body.currentPassword,
+    req.body.newPassword
+  );
+  res.json({ message: "Contraseña actualizada correctamente" });
+}

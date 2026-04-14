@@ -4,31 +4,38 @@
 
 .camera-view {
   position: relative;
-  height: 280px;
+  min-height: 280px;
   background: #1f2937;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-
-  &.scanning { background: #0f172a; }
 }
 
-.overlay-top, .overlay-bottom {
-  position: absolute;
-  left: 0; right: 0;
-  height: 60px;
-  background: rgba(0,0,0,0.55);
-  z-index: 2;
-}
-.overlay-top  { top: 0; }
-.overlay-bottom { bottom: 0; }
-
-.scan-frame {
-  width: 180px;
-  height: 120px;
+// Actual video wrapper
+.video-wrap {
   position: relative;
-  z-index: 3;
+  width: 100%;
+}
+
+.video-feed {
+  width: 100%;
+  max-height: 300px;
+  object-fit: cover;
+  display: block;
+  background: #000;
+}
+
+// Frame overlay on top of the video
+.scan-frame {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 220px;
+  height: 140px;
+  pointer-events: none;
 
   .corner {
     position: absolute;
@@ -49,8 +56,6 @@
     box-shadow: 0 0 8px #3b82f6;
     animation: scanMove 1.4s ease-in-out infinite alternate;
   }
-
-  &.active .corner { border-color: #3b82f6; }
 }
 
 @keyframes scanMove {
@@ -58,32 +63,45 @@
   to   { top: 85%; }
 }
 
-.scan-instruction {
-  position: absolute;
-  bottom: 8px;
+.scan-hint {
   text-align: center;
-  color: rgba(255,255,255,0.75);
+  color: rgba(255,255,255,0.80);
   font-size: 13px;
-  z-index: 4;
-  line-height: 1.6;
-
-  ion-icon { font-size: 24px; display: block; margin: 0 auto 4px; }
+  padding: 8px 16px;
+  background: rgba(0,0,0,0.50);
+  margin: 0;
 }
 
-.pulse {
-  animation: pulseAnim 0.8s ease-in-out infinite alternate;
-  color: #3b82f6;
+.idle-state, .camara-error, .buscando-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 32px 24px 16px;
+  color: rgba(255,255,255,0.70);
+  text-align: center;
+
+  ion-icon { font-size: 48px; }
+  p { font-size: 14px; line-height: 1.6; margin: 0; }
 }
-@keyframes pulseAnim {
-  from { opacity: 0.5; }
-  to   { opacity: 1; }
+
+.camara-error {
+  color: #fca5a5;
+  ion-icon { color: #f87171; }
 }
+
+.scan-btn-wrap {
+  width: 100%;
+  background: #1f2937;
+  padding: 20px 20px 32px;
+}
+
+.scan-main-btn { --border-radius: 12px; }
 
 .resultado-panel {
   background: white;
   border-radius: 20px 20px 0 0;
   padding: 20px 20px 8px;
-  margin-top: -1px;
 
   .resultado-header {
     display: flex;
@@ -93,7 +111,6 @@
     color: var(--ion-color-success);
     margin-bottom: 12px;
     font-weight: 600;
-
     ion-icon { font-size: 18px; }
   }
 
@@ -107,7 +124,6 @@
   align-items: center;
   justify-content: space-between;
   margin: 12px 0;
-
   .precio { font-size: 26px; font-weight: 700; color: var(--ion-color-primary); }
 }
 
@@ -135,16 +151,6 @@
   border-radius: 20px 20px 0 0;
   padding: 40px 20px;
   text-align: center;
-
   ion-icon { font-size: 64px; }
   h3 { font-size: 20px; font-weight: 700; color: var(--ion-color-success); margin-top: 12px; }
-}
-
-.scan-btn-wrap {
-  background: #1f2937;
-  padding: 20px 20px 32px;
-}
-
-.scan-main-btn {
-  --border-radius: 12px;
 }

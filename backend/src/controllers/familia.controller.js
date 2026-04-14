@@ -14,3 +14,12 @@ export async function miembros(req, res) {
   const rows = await familiaService.miembrosFamilia(req.params.familia_id);
   res.json(rows);
 }
+
+export async function mia(req, res) {
+  const familia = await familiaService.miFamilia(req.userId);
+  if (!familia) {
+    res.status(404).json({ error: "No perteneces a ninguna familia" });
+    return;
+  }
+  res.json(familia);
+}

@@ -1,39 +1,67 @@
 <ion-header>
   <ion-toolbar color="primary">
     <ion-title>Escáner de Productos</ion-title>
+    <ion-buttons slot="end">
+      <ion-button *ngIf="auth.isAuthenticated" (click)="profile.abrirPerfil()">
+        <ion-icon slot="icon-only" name="person-circle-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="scanner-content">
 
-  <!-- Vista de cámara simulada -->
-  <div class="camera-view" [class.scanning]="escaneando">
+  <!-- Camera / idle area -->
+  <div class="camera-view">
 
-    <div class="overlay-top"></div>
-
-    <div class="scan-frame" [class.active]="escaneando">
-      <div class="corner tl"></div>
-      <div class="corner tr"></div>
-      <div class="corner bl"></div>
-      <div class="corner br"></div>
-      <div class="scan-line" *ngIf="escaneando"></div>
+    <!-- Live camera feed -->
+    <div class="video-wrap" *ngIf="escaneando">
+      <video #videoEl class="video-feed" autoplay playsinline muted></video>
+      <!-- Scan frame overlay -->
+      <div class="scan-frame">
+        <div class="corner tl"></div>
+        <div class="corner tr"></div>
+        <div class="corner bl"></div>
+        <div class="corner br"></div>
+        <div class="scan-line"></div>
+      </div>
+      <p class="scan-hint">Apunta al código de barras del producto</p>
     </div>
 
-    <div class="overlay-bottom"></div>
+    <!-- Camera permission / device error -->
+    <div class="camara-error" *ngIf="camaraError && !escaneando">
+      <ion-icon name="videocam-off-outline"></ion-icon>
+      <p>{{ camaraError }}</p>
+    </div>
 
-    <p class="scan-instruction" *ngIf="!productoDetectado && !escaneando">
-      <ion-icon name="barcode-outline"></ion-icon><br>
-      Apunta la cámara al código<br>de barras del producto
-    </p>
+    <!-- Searching spinner (after scan, before result) -->
+    <div class="buscando-state" *ngIf="procesando && !productoDetectado">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+      <p>Buscando producto...</p>
+    </div>
 
-    <p class="scan-instruction" *ngIf="escaneando">
-      <ion-icon name="radio-button-on" class="pulse"></ion-icon><br>
-      Escaneando...
-    </p>
+    <!-- Idle state -->
+    <div class="idle-state" *ngIf="!escaneando && !camaraError && !procesando && !productoDetectado && !agregadoExitoso">
+      <ion-icon name="barcode-outline"></ion-icon>
+      <p>Apunta la cámara al código<br>de barras del producto</p>
+    </div>
+
+    <!-- Scan / Cancel button -->
+    <div class="scan-btn-wrap" *ngIf="!procesando && !productoDetectado && !agregadoExitoso">
+      <ion-button
+        expand="block"
+        [color]="escaneando ? 'danger' : 'primary'"
+        (click)="escaneando ? cancelarEscaneo() : iniciarEscaneo()"
+        class="scan-main-btn"
+      >
+        <ion-icon slot="start" [name]="escaneando ? 'close-outline' : 'scan-outline'"></ion-icon>
+        {{ escaneando ? 'Cancelar' : 'Iniciar escaneo' }}
+      </ion-button>
+    </div>
 
   </div>
 
-  <!-- Resultado del escaneo -->
+  <!-- Product result -->
   <div class="resultado-panel" *ngIf="productoDetectado && !agregadoExitoso">
     <div class="resultado-header">
       <ion-icon name="checkmark-circle" color="success"></ion-icon>
@@ -76,23 +104,10 @@
     </div>
   </div>
 
-  <!-- Éxito -->
+  <!-- Success -->
   <div class="exito-panel" *ngIf="agregadoExitoso">
     <ion-icon name="checkmark-circle" color="success"></ion-icon>
     <h3>¡Agregado a la lista!</h3>
-  </div>
-
-  <!-- Botón principal de escaneo -->
-  <div class="scan-btn-wrap" *ngIf="!productoDetectado && !agregadoExitoso">
-    <ion-button
-      expand="block"
-      [color]="escaneando ? 'danger' : 'primary'"
-      (click)="escaneando ? cancelarEscaneo() : iniciarEscaneo()"
-      class="scan-main-btn"
-    >
-      <ion-icon slot="start" [name]="escaneando ? 'close-outline' : 'scan-outline'"></ion-icon>
-      {{ escaneando ? 'Cancelar' : 'Iniciar escaneo' }}
-    </ion-button>
   </div>
 
 </ion-content>

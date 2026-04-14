@@ -9,8 +9,7 @@
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e",
-    "ionic:serve": "ng serve",
+    "ionic:serve": "ng serve --port 8100",
     "ionic:build": "ng build"
   },
   "private": true,
@@ -22,7 +21,11 @@
     "@angular/platform-browser-dynamic": "^17.0.0",
     "@angular/router": "^17.0.0",
     "@ionic/angular": "^7.5.0",
+    "@types/leaflet": "^1.9.21",
+    "@zxing/browser": "^0.1.5",
+    "@zxing/library": "^0.21.3",
     "ionicons": "^7.2.0",
+    "leaflet": "^1.9.4",
     "rxjs": "~7.8.0",
     "tslib": "^2.6.0",
     "zone.js": "~0.14.0"

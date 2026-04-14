@@ -40,16 +40,30 @@ export async function unirseFamilia(userId, codigo) {
   const ya = await prisma.familiaMiembro.findUnique({
     where: { familiaId_userId: { familiaId: familia.id, userId } },
   });
-  if (ya) throw new AppError(409, "Ya eres miembro de esta familia");
 
-  await prisma.familiaMiembro.create({
-    data: { familiaId: familia.id, userId, rol: "MIEMBRO" },
-  });
+  if (!ya) {
+    await prisma.familiaMiembro.create({
+      data: { familiaId: familia.id, userId, rol: "MIEMBRO" },
+    });
+  }
 
   return prisma.familia.findUnique({
     where: { id: familia.id },
     select: { id: true, nombre: true, codigoInvitacion: true, createdAt: true },
   });
+}
+
+export async function miFamilia(userId) {
+  const miembro = await prisma.familiaMiembro.findFirst({
+    where: { userId },
+    include: {
+      familia: {
+        select: { id: true, nombre: true, codigoInvitacion: true, createdAt: true },
+      },
+    },
+    orderBy: { joinedAt: "desc" },
+  });
+  return miembro ? miembro.familia : null;
 }
 
 export async function miembrosFamilia(familiaId) {
