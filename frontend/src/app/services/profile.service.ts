@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AlertController, ToastController } from '@ionic/angular';
+import { Router } from '@angular/router';
 import { ApiService } from './api.service';
 import { AuthService } from './auth.service';
 
@@ -11,6 +12,7 @@ export class ProfileService {
     private toastCtrl: ToastController,
     private api: ApiService,
     private auth: AuthService,
+    private router: Router,
   ) {}
 
   async abrirPerfil(): Promise<void> {
@@ -32,6 +34,7 @@ export class ProfileService {
           handler: () => {
             this.auth.logout();
             this.showToast('Sesión cerrada', 'log-out-outline');
+            this.router.navigateByUrl('/tabs/lista', { replaceUrl: true });
           },
         },
         { text: 'Cancelar', role: 'cancel' },
