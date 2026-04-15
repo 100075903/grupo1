@@ -1,6 +1,8 @@
 {
   "name": "compras-rd",
-  "integrations": {},
+  "integrations": {
+    "capacitor": {}
+  },
   "type": "angular",
   "id": "compras-rd"
 }
