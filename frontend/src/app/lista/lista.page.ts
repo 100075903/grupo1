@@ -97,6 +97,20 @@ export class ListaPage implements OnInit {
   }
 
   async agregarProducto(): Promise<void> {
+    // Require a family group before adding to the shared list
+    if (!this.auth.familiaId) {
+      const alert = await this.alertCtrl.create({
+        header: 'Familia requerida',
+        message: 'Debes crear o unirte a un grupo familiar antes de agregar productos a la lista.',
+        buttons: [
+          { text: 'Ahora no', role: 'cancel' },
+          { text: 'Configurar familia', handler: () => this.pedirFamilia() },
+        ],
+      });
+      await alert.present();
+      return;
+    }
+
     const alert = await this.alertCtrl.create({
       header: 'Agregar producto',
       inputs: [
@@ -109,6 +123,7 @@ export class ListaPage implements OnInit {
         {
           text: 'Agregar',
           handler: (data) => {
+            // Returning false prevents the alert from closing on validation failure
             if (!data.nombre?.trim()) return false;
             this.svc.agregarProducto({
               nombre: data.nombre.trim(),

@@ -3,6 +3,8 @@ import { prisma } from "../lib/prisma.js";
 import { AppError } from "../middleware/errorHandler.js";
 import { signAccessToken } from "../utils/tokens.js";
 
+// bcrypt cost factor — 12 rounds is a good balance between security and
+// response time (~300 ms on modern hardware). Increase for higher security.
 const SALT_ROUNDS = 12;
 
 export async function register(data) {
@@ -41,6 +43,8 @@ export async function cambiarPassword(userId, currentPassword, newPassword) {
 export async function login(data) {
   const email = data.email.trim().toLowerCase();
   const user = await prisma.user.findUnique({ where: { email } });
+  // Return the same generic error whether the email doesn't exist or the
+  // password is wrong — prevents attackers from enumerating valid emails.
   if (!user) throw new AppError(401, "Credenciales inválidas");
 
   const ok = await bcrypt.compare(data.password, user.passwordHash);

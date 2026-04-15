@@ -32,6 +32,9 @@ export async function actualizarProductoLista(listaId, productoId, data) {
   });
   if (!p) throw new AppError(404, "Producto no encontrado en esta lista");
 
+  // Only include fields that were explicitly sent in the request.
+  // `undefined` means the client didn't send that field — omitting it
+  // prevents accidentally overwriting existing values with undefined/null.
   return prisma.productoLista.update({
     where: { id: productoId },
     data: {

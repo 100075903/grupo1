@@ -44,6 +44,8 @@ export class AuthService {
   async login(email: string, password: string): Promise<void> {
     const res = await firstValueFrom(this.api.login(email, password));
     const prev = this._state.value;
+    // If the same user is logging in again, preserve their cached familia data
+    // so we don't lose the family context while the server request is in flight.
     const sameUser = prev?.user?.id === res.user.id;
 
     const familiaId     = sameUser ? (prev?.familiaId     ?? null) : null;
@@ -61,6 +63,7 @@ export class AuthService {
         familiaId: familia.id,
         familiaNombre: familia.nombre,
         familiaCode: familia.codigoInvitacion,
+        // Reset listaId when the family changed — the old lista belongs to a different family
         listaId: changed ? null : this._state.value?.listaId ?? null,
       });
     } catch {

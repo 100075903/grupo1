@@ -61,6 +61,9 @@ export class ComparadorPage {
     this.buscar();
   }
 
+  // Returns the visual bar width (40–100%) for a given price.
+  // Cheapest price → 100%, most expensive → 40%. The 60-point spread keeps
+  // even the priciest bar visible so the comparison remains readable.
   getPorcentaje(precio: number, precios: PrecioTienda[]): number {
     const min = Math.min(...precios.map(p => p.precio));
     const max = Math.max(...precios.map(p => p.precio));

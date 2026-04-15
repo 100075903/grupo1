@@ -1,6 +1,8 @@
 import { prisma } from "../lib/prisma.js";
 import { AppError } from "./errorHandler.js";
 
+// Factory — returns middleware so callers can specify which route param holds
+// the familia ID (defaults to "familia_id"). Sets req.familiaRol for downstream use.
 export function requireFamiliaMember(paramName = "familia_id") {
   return async (req, _res, next) => {
     const userId = req.userId;
