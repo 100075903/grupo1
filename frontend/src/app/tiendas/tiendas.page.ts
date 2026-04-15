@@ -73,12 +73,17 @@ export class TiendasPage implements OnDestroy {
     private alertCtrl: AlertController,
   ) {}
 
-  // ── Ionic lifecycle: use ionViewDidEnter so the DOM is ready ─────────────
+  // ── Ionic lifecycle ───────────────────────────────────────────────────────
 
+  // ionViewDidEnter (not ionViewWillEnter) is used here because Leaflet needs
+  // the #tiendas-map div to be fully rendered in the DOM before it can attach.
   ionViewDidEnter(): void {
     this.cargarTiendas();
   }
 
+  // destroyMap is called on both leave and destroy:
+  // - ionViewWillLeave handles tab switches (component stays alive)
+  // - ngOnDestroy handles full component teardown
   ionViewWillLeave(): void {
     this.destroyMap();
   }
@@ -199,6 +204,8 @@ export class TiendasPage implements OnDestroy {
     this.tiendaSeleccionada = t;
     this.content?.scrollToTop(400);
     if (!this.map) return;
+    // Delay flyTo so the detail panel slide animation finishes first,
+    // then open the popup after the fly animation completes (~900 ms).
     setTimeout(() => {
       this.map!.flyTo([t.lat, t.lng], 16, { duration: 0.8 });
       const idx = this.tiendrasFiltradas.findIndex(x => x.id === t.id);
@@ -300,11 +307,14 @@ export class TiendasPage implements OnDestroy {
     // Fit map to all visible markers
     if (this.markers.length > 0) {
       const group = L.featureGroup(this.markers);
+      // pad(0.15) adds 15% breathing room so markers aren't flush against the viewport edge
       this.map!.fitBounds(group.getBounds().pad(0.15));
     }
   }
 
   private buildIcon(color: string, emoji: string): L.DivIcon {
+    // Teardrop shape: rotate a circle with one flat corner by -45°,
+    // then counter-rotate the inner emoji to keep it upright.
     return L.divIcon({
       html: `<div style="
         background:${color};
